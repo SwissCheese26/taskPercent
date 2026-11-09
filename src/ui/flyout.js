@@ -80,6 +80,7 @@ function save() { api.setSettings(settings); render(); }
 $('thr-minus').onclick = () => { settings.threshold = Math.max(5, settings.threshold - 5); save(); };
 $('thr-plus').onclick = () => { settings.threshold = Math.min(30, settings.threshold + 5); save(); };
 $('autostart').onchange = (e) => { settings.autostart = e.target.checked; save(); };
+$('manage').onclick = () => api.openDevices();
 $('test').onclick = () => api.testWarning();
 $('quit').onclick = () => api.quit();
 api.onSettings((s) => { settings = s; $('autostart').checked = s.autostart; render(); });

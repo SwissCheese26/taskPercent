@@ -6,5 +6,7 @@ contextBridge.exposeInMainWorld('api', {
   onSettings: (cb) => ipcRenderer.on('settings:changed', (_e, s) => cb(s)),
   testWarning: () => ipcRenderer.send('toast:test'),
   closeToast: () => ipcRenderer.send('toast:close'),
+  openDevices: () => ipcRenderer.send('devices:open'),
+  closeDevices: () => ipcRenderer.send('devices:close'),
   quit: () => ipcRenderer.send('app:quit'),
 });

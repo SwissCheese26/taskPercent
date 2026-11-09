@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 
 const UI = path.join(__dirname, 'ui');
-let tray, flyout, toast, toastTimer, blinkTimer;
+let tray, flyout, devices, toast, toastTimer, blinkTimer;
 let battery = null;          // letzter Zustand vom Renderer
 let warned = false, blinkOn = false;
 let sim = null;              // --simulate Wert
@@ -18,6 +18,7 @@ function parseArgs(argv) {
     else if (argv[i].startsWith('--simulate=')) out.simulate = argv[i].split('=')[1];
     else if (argv[i] === '--test-warning') out.testWarning = true;
     else if (argv[i] === '--show') out.show = true;
+    else if (argv[i] === '--devices') out.devices = true;
     else if (argv[i] === '--quit') out.quit = true;
   }
   return out;
@@ -27,6 +28,7 @@ function handleArgs(a) {
   if (a.simulate) { sim = a.simulate; loadFlyout(); }
   if (a.testWarning) showToast(battery ? battery.percent : 14);
   if (a.show) showFlyout();
+  if (a.devices) showDevices();
 }
 
 if (!app.requestSingleInstanceLock()) app.quit();
@@ -58,6 +60,18 @@ function showFlyout() {
   const y = Math.max(wa.y + 8, wa.y + wa.height - height - 12);
   flyout.setPosition(Math.round(x), Math.round(y));
   flyout.show(); flyout.focus();
+}
+function showDevices() {
+  if (devices && !devices.isDestroyed()) { devices.show(); devices.focus(); return; }
+  devices = new BrowserWindow({
+    width: 1000, height: 680, minWidth: 820, minHeight: 560, frame: true, autoHideMenuBar: true, backgroundColor: '#0A0D12', title: 'taskPercent – Geräte',
+    webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true },
+  });
+  devices.setMenu(null);
+  // Mikrofon-Zugriff nur fuer dieses lokale Fenster erlauben
+  devices.webContents.session.setPermissionRequestHandler((_wc, perm, cb) => cb(perm === 'media'));
+  devices.loadFile(path.join(UI, 'devices.html'));
+  devices.on('closed', () => (devices = null));
 }
 function showToast(percent) {
   closeToast();
@@ -107,6 +121,7 @@ function onBattery(b) {
 function buildMenu() {
   return Menu.buildFromTemplate([
     { label: 'Öffnen', click: showFlyout },
+    { label: 'Geräte verwalten…', click: showDevices },
     { label: 'Warnung testen', click: () => showToast(battery ? battery.percent : 14) },
     { type: 'separator' },
     { label: 'Beenden', click: () => app.quit() },
@@ -124,6 +139,7 @@ app.whenReady().then(() => {
   tray.setContextMenu(buildMenu());
   createFlyout();
   if (first.testWarning) setTimeout(() => showToast(14), 800);
+  if (first.devices) showDevices();
   if (first.show) flyout.once('ready-to-show', showFlyout);
 });
 
@@ -139,4 +155,6 @@ ipcMain.on('settings:set', (_e, s) => {
 });
 ipcMain.on('toast:test', () => showToast(battery ? battery.percent : 14));
 ipcMain.on('toast:close', closeToast);
+ipcMain.on('devices:open', () => { flyout.hide(); showDevices(); });
+ipcMain.on('devices:close', () => devices && devices.close());
 ipcMain.on('app:quit', () => app.quit());
