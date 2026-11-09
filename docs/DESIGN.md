@@ -1,23 +1,20 @@
-# Design: "Obsidian Cell"
+# Design
 
-Tiefes Schwarzblau, ein einziger Akzent pro Zustand, der Rest ist Typografie und Licht. Der Akku ist ein **Ring aus 20 Zellen** (je 5 %), die aufleuchten wie LEDs.
+Ruhig, hell/dunkel nach Systemeinstellung, an Apple-Systemfarben angelehnt. Kein Neon, keine Glows, keine Mono-Labels.
 
 ## Tokens (`src/ui/tokens.css`)
-| Gruppe | Werte |
-|---|---|
-| Fläche | `#0A0D12` Fenster · `#10151C` erhöht · `#171E28` Controls · `#222B38` Linie |
-| Text | `#E8EEF6` · `#8895A7` gedimmt · `#566274` leise |
-| Zustand | normal `#5CF2C8` · lädt `#C6FF4D` · knapp `#FFB224` · kritisch `#FF4D5E` |
-| Schrift | Display: Bahnschrift (Fallback Segoe UI) · Mono: Cascadia Mono für Labels |
-| Abstand | 4-px-Raster (4/8/12/16/24/32), Radius 14 / 8 / Pille |
-| Motion | 140 ms Hover · 320 ms State · 900 ms Einblenden; `prefers-reduced-motion` schaltet alles ab |
+| | Hell | Dunkel |
+|---|---|---|
+| Fenster / Karte | `#F5F5F7` / `#FFFFFF` | `#1C1C1E` / `#2C2C2E` |
+| Text · sekundär | `#1D1D1F` · `#6E6E73` | `#F5F5F7` · `#98989D` |
+| Akzent (Buttons) | `#007AFF` | `#0A84FF` |
+| Grün · Orange · Rot | `#34C759` `#FF9500` `#FF3B30` | `#30D158` `#FF9F0A` `#FF453A` |
 
-Zustand wird nur über `data-state` am `<body>` gesetzt; `--tone`, Glow und Hintergrundschimmer folgen daraus.
+Akkuzustand: normal/lädt = grün, knapp = orange, kritisch = rot (`data-state` am `<body>`).
+Schrift: Segoe UI Variable (Display/Text). Radius 14 (Karten) / 9 (Controls). Bewegung 120–600 ms, `prefers-reduced-motion` aus.
 
 ## Komponenten
-- **Flyout** (360×548): Header (Wortmarke + Status-Chip) → Ring + große Zahl → Stat-Leiste → Schwellen-Stepper → Footer (Switch, Aktionen).
-- **Toast** (400×132): Zahl in Koralle pulsierend, Text, Balken der in 12 s ausläuft; Klick schließt.
-- **Tray-Icon** (32 px): dunkle Kachel, Zahl in Zustandsfarbe, Balken unten; kritisch blinkt gegen eine invertierte (farbige) Kachel.
-
-## Barrierefreiheit
-Statuswechsel via `role=status`/`aria-live`, Toast `role=alert`, sichtbarer Fokusring in Zustandsfarbe, Zustand nie nur über Farbe (Chip-Text + Unterzeile).
+- **Flyout:** Titel + Status, durchgehender Fortschrittsring, gruppierte Liste (Status, Restzeit, Warnschwelle, Autostart), blauer Hauptknopf.
+- **Geräte-Fenster:** Sidebar mit farbigen Symbolkacheln (wie iOS-Einstellungen), Karten mit sanftem Schatten, iOS-Schalter, runde Schieberegler.
+- **Warnung:** Banner im Mitteilungsstil mit Symbolkachel, Titel, Text und Prozentzahl.
+- **Tray-Icon:** nur die Zahl (hell/dunkel passend zur Taskleiste); Farbe nur bei Laden (grün), knapp (orange); kritisch blinkt gegen roten Grund.
