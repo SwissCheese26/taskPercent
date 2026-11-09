@@ -9,12 +9,73 @@
   "scripts": {
     "start": "electron .",
     "demo": "electron . --simulate 14",
-    "dist": "electron-builder --win portable"
+    "dist": "electron-builder --win nsis",
+    "pack": "electron-builder --dir"
   },
   "license": "MIT",
   "private": true,
   "devDependencies": {
     "electron": "^45.2.3",
     "electron-builder": "^26.18.0"
+  },
+  "build": {
+    "appId": "de.taskpercent.app",
+    "productName": "taskPercent",
+    "executableName": "taskPercent",
+    "copyright": "MIT",
+    "publish": null,
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "src/**/*",
+      "native/**/*",
+      "bin/**/*",
+      "package.json"
+    ],
+    "asar": false,
+    "electronLanguages": [
+      "de",
+      "en-US"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.ico",
+      "artifactName": "taskPercent-Setup-${version}.exe"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowElevation": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "taskPercent",
+      "menuCategory": false,
+      "runAfterFinish": true,
+      "deleteAppDataOnUninstall": true,
+      "uninstallDisplayName": "taskPercent",
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico",
+      "installerSidebar": "build/installerSidebar.bmp",
+      "uninstallerSidebar": "build/uninstallerSidebar.bmp",
+      "installerHeader": "build/installerHeader.bmp",
+      "include": "build/installer.nsh",
+      "language": "1031",
+      "displayLanguageSelector": false,
+      "warningsAsErrors": false,
+      "installerLanguages": [
+        "de_DE"
+      ],
+      "multiLanguageInstaller": true
+    }
   }
 }
