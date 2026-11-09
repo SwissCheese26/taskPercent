@@ -33,4 +33,5 @@ class PsServer {
 }
 
 const audio = new PsServer(path.join(__dirname, '..', 'native', 'audio.ps1'));
-module.exports = { audio };
+const bluetooth = new PsServer(path.join(__dirname, '..', 'native', 'bluetooth.ps1'));
+module.exports = { audio, bluetooth };

@@ -6,6 +6,11 @@ const api = window.api || { // Browser-Vorschau ohne Electron: Demo-Daten
     { Id: 'a', Name: 'Lautsprecher (Realtek Audio)', Flow: 'render', Volume: 42, Muted: false, IsDefault: true },
     { Id: 'b', Name: 'Kopfhörer (WH-1000XM5)', Flow: 'render', Volume: 65, Muted: false, IsDefault: false },
     { Id: 'c', Name: 'Mikrofon (Headset)', Flow: 'capture', Volume: 80, Muted: true, IsDefault: true } ] }),
+  btList: async () => ({ ok: true, data: [
+    { Name: 'WH-1000XM5', Id: 'BTHENUM\\DEV_1', Connected: true, Disabled: false },
+    { Name: 'Galaxy Buds2', Id: 'BTHENUM\\DEV_2', Connected: false, Disabled: true } ] }),
+  btAction: async () => ({ ok: true }), adminStatus: async () => ({ ok: true, data: false }),
+  adminSetup: async () => ({ ok: true }), adminRemove: async () => ({ ok: true }),
   audioVolume: async () => ({ ok: true }), audioMute: async () => ({ ok: true }),
 };
 const tabs = {}; // Feature-Module registrieren sich hier: tabs.mic = { open(), close() }

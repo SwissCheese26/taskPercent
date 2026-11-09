@@ -2,6 +2,7 @@ const { app, BrowserWindow, Tray, Menu, Notification, screen, ipcMain, nativeIma
 const fs = require('fs');
 const path = require('path');
 const native = require('./native');
+const admin = require('./admin');
 
 const UI = path.join(__dirname, 'ui');
 let tray, flyout, devices, toast, toastTimer, blinkTimer;
@@ -163,5 +164,14 @@ const guard = (fn) => async (_e, a) => { try { return { ok: true, data: await fn
 ipcMain.handle('audio:list', guard(() => native.audio.call('list')));
 ipcMain.handle('audio:volume', guard((a) => native.audio.call('volume', { id: String(a.id), value: Number(a.value) })));
 ipcMain.handle('audio:mute', guard((a) => native.audio.call('mute', { id: String(a.id), value: !!a.value })));
-app.on('before-quit', () => native.audio.stop());
+// ---------- Bluetooth + Admin-Helfer
+ipcMain.handle('bt:list', guard(() => native.bluetooth.call('list')));
+ipcMain.handle('bt:action', guard((a) => {
+  if (!['connect', 'disconnect'].includes(a.action)) throw new Error('Aktion nicht erlaubt');
+  return admin.request(a.action, String(a.id));
+}));
+ipcMain.handle('admin:status', guard(() => admin.status()));
+ipcMain.handle('admin:setup', guard(() => admin.setup()));
+ipcMain.handle('admin:remove', guard(() => admin.remove()));
+app.on('before-quit', () => { native.audio.stop(); native.bluetooth.stop(); });
 ipcMain.on('app:quit', () => app.quit());

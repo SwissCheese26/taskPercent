@@ -11,5 +11,10 @@ contextBridge.exposeInMainWorld('api', {
   audioList: () => ipcRenderer.invoke('audio:list'),
   audioVolume: (id, value) => ipcRenderer.invoke('audio:volume', { id, value }),
   audioMute: (id, value) => ipcRenderer.invoke('audio:mute', { id, value }),
+  btList: () => ipcRenderer.invoke('bt:list'),
+  btAction: (id, action) => ipcRenderer.invoke('bt:action', { id, action }),
+  adminStatus: () => ipcRenderer.invoke('admin:status'),
+  adminSetup: () => ipcRenderer.invoke('admin:setup'),
+  adminRemove: () => ipcRenderer.invoke('admin:remove'),
   quit: () => ipcRenderer.send('app:quit'),
 });
