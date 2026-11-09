@@ -35,3 +35,11 @@ Danach keine Abfrage mehr; Entfernen jederzeit im Tab „Geräte". Alles andere 
 **Grenzen:** Effekte/EQ wirken in der App (Test, Monitor, Aufnahme, Vorschau), nicht systemweit – dafür bräuchte es einen Audiotreiber (z. B. Equalizer APO).
 
 Designsystem: [docs/DESIGN.md](docs/DESIGN.md). Das ursprüngliche PowerShell-Skript liegt als `legacy-BatteryTray.ps1` bei.
+
+## Installer
+Windows-Installer (NSIS, Assistent, **pro Benutzer – keine Administratorrechte nötig**) mit Zielordner-Auswahl, Desktop- und Startmenü-Verknüpfung sowie auf der Abschlussseite „taskPercent jetzt starten" und „Mit Windows starten".
+
+- **Bauen (unter Windows):** `npm install`, dann `npm run dist` → `dist\taskPercent-Setup-<Version>.exe`. `npm run pack` erzeugt nur den entpackten Ordner.
+- **Ein-Zeilen-Installation:** `irm https://raw.githubusercontent.com/SwissCheese26/taskPercent/main/installer/install.ps1 | iex` (lädt den neuesten Release-Installer, sonst Quellbau mit Node; Details im Skript).
+- **Aufbau:** Konfiguration in `package.json` → `build`, NSIS-Anpassungen in `build/installer.nsh`, Icon und Grafiken in `build/`. Das Paket liegt ohne `asar` vor (`resources\app\native`), weil PowerShell die Skripte von der Platte lesen muss.
+- **Deinstallation:** entfernt Programm, Verknüpfungen, Autostart-Eintrag und App-Daten. Die geplante Aufgabe `taskPercentHelper` und `%ProgramData%\taskPercent` (Admin-Helfer) lassen sich nur mit Administratorrechten löschen: Der Deinstaller fragt danach und zeigt dann die Windows-Abfrage; bei stiller Deinstallation oder Abbruch bleiben sie bestehen (Entfernen auch im Tab „Geräte" der App oder per PowerShell als Administrator: `Unregister-ScheduledTask taskPercentHelper -Confirm:$false; Remove-Item -Recurse -Force "$env:ProgramData\taskPercent"`).
