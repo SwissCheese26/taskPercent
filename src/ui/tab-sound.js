@@ -102,8 +102,8 @@
       for (let i = 0; i < n; i++) {
         const f0 = 30 * Math.pow(18000 / 30, i / n), f1 = 30 * Math.pow(18000 / 30, (i + 1) / n);
         let m = 0; for (let b = Math.floor(f0 / nyq * bins.length); b <= Math.ceil(f1 / nyq * bins.length) && b < bins.length; b++) m = Math.max(m, bins[b]);
-        const h = (m / 255) ** 1.4 * (H - 10); const col = i < 14 ? '#C6FF4D' : i < 44 ? '#5CF2C8' : '#FFB224';
-        g.fillStyle = col; g.shadowColor = col; g.shadowBlur = 12; g.fillRect(i * bw + 3, H - h, bw - 6, h);
+        const h = Math.max(4, (m / 255) ** 1.4 * (H - 10));
+        g.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim(); g.beginPath(); g.roundRect(i * bw + 3, H - h, bw - 6, h, 4); g.fill();
       }
       raf = requestAnimationFrame(tick);
     }; cancelAnimationFrame(raf); tick();

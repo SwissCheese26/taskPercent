@@ -1,10 +1,11 @@
-const { app, BrowserWindow, Tray, Menu, Notification, screen, ipcMain, nativeImage } = require('electron');
+const { app, BrowserWindow, Tray, Menu, Notification, screen, ipcMain, nativeImage, nativeTheme } = require('electron');
 const fs = require('fs');
 const path = require('path');
 const native = require('./native');
 const admin = require('./admin');
 
 const UI = path.join(__dirname, 'ui');
+const bgColor = () => (nativeTheme.shouldUseDarkColors ? '#1C1C1E' : '#F5F5F7');
 let tray, flyout, devices, toast, toastTimer, blinkTimer;
 let battery = null;          // letzter Zustand vom Renderer
 let warned = false, blinkOn = false;
@@ -49,7 +50,7 @@ function loadFlyout() {
 function createFlyout() {
   flyout = new BrowserWindow({
     width: 360, height: 548, show: false, frame: false, resizable: false, skipTaskbar: true, alwaysOnTop: true,
-    backgroundColor: '#0A0D12', fullscreenable: false,
+    backgroundColor: bgColor(), fullscreenable: false,
     webPreferences: { preload: path.join(__dirname, 'preload.js'), backgroundThrottling: false, contextIsolation: true },
   });
   loadFlyout();
@@ -67,7 +68,7 @@ function showDevices(tab) {
   if (typeof tab !== 'string') tab = undefined;
   if (devices && !devices.isDestroyed()) { devices.show(); devices.focus(); if (tab) devices.webContents.send('devices:tab', tab); return; }
   devices = new BrowserWindow({
-    width: 1000, height: 680, minWidth: 820, minHeight: 560, frame: true, autoHideMenuBar: true, backgroundColor: '#0A0D12', title: 'taskPercent – Geräte',
+    width: 1000, height: 680, minWidth: 820, minHeight: 560, frame: true, autoHideMenuBar: true, backgroundColor: bgColor(), title: 'taskPercent – Geräte',
     webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true },
   });
   devices.setMenu(null);

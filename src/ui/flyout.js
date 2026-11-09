@@ -4,26 +4,10 @@ const api = window.api || { // Fallback fuer Browser-Vorschau ohne Electron
   report() {}, getSettings: async () => ({ threshold: 15, autostart: false }), setSettings() {}, testWarning() {}, quit() {}, onSettings() {},
 };
 const params = new URLSearchParams(location.search);
-const SEG = 20;
 let settings = { threshold: 15, autostart: false };
 let last = { percent: null, plugged: false, secs: null };
 
-// ---- Ring aus 20 Segmenten (je 5 %)
-const ring = $('ring');
-const NS = 'http://www.w3.org/2000/svg';
-const segs = [];
-(function build() {
-  const R = 98, gap = 3.2, span = 360 / SEG;
-  for (let i = 0; i < SEG; i++) {
-    const a0 = (-90 + i * span + gap) * Math.PI / 180, a1 = (-90 + (i + 1) * span - gap) * Math.PI / 180;
-    const p = document.createElementNS(NS, 'path');
-    p.setAttribute('d', `M${R * Math.cos(a0)} ${R * Math.sin(a0)} A${R} ${R} 0 0 1 ${R * Math.cos(a1)} ${R * Math.sin(a1)}`);
-    p.setAttribute('class', 'seg'); p.style.setProperty('--i', i);
-    ring.appendChild(p); segs.push(p);
-  }
-  const core = document.createElementNS(NS, 'circle');
-  core.setAttribute('r', 80); core.setAttribute('class', 'core'); ring.appendChild(core);
-})();
+const prog = $('prog'), CIRC = 2 * Math.PI * 94;
 
 function stateOf(percent, plugged) {
   if (plugged) return 'charging';
@@ -31,7 +15,7 @@ function stateOf(percent, plugged) {
   if (percent <= settings.threshold + 15) return 'warn';
   return 'normal';
 }
-const LABEL = { normal: 'Akkubetrieb', charging: 'Lädt', warn: 'Wird knapp', critical: 'Kritisch' };
+const LABEL = { normal: 'Akkubetrieb', charging: 'Lädt', warn: 'Akku wird knapp', critical: 'Akku schwach' };
 function fmt(secs) {
   if (!isFinite(secs) || secs <= 0) return '—';
   const h = Math.floor(secs / 3600), m = Math.floor((secs % 3600) / 60);
@@ -47,10 +31,9 @@ function render() {
   $('chip').textContent = LABEL[st];
   $('st-state').textContent = plugged ? (percent >= 100 ? 'Voll' : 'Netzteil') : 'Akku';
   $('st-time').textContent = plugged ? '—' : fmt(secs);
-  $('sub').textContent = st === 'critical' ? 'NETZTEIL ANSCHLIESSEN' : st === 'charging' ? 'WIRD GELADEN' : plugged ? 'AM NETZ' : 'VERBLEIBEND ' + fmt(secs).replace(' h', '');
-  $('thr-val').textContent = $('st-thr').textContent = settings.threshold + '%';
-  const lit = Math.ceil(percent / (100 / SEG));
-  segs.forEach((s, i) => { s.classList.toggle('on', i < lit); s.classList.toggle('edge', i === lit - 1 && st === 'normal'); });
+  $('sub').textContent = st === 'critical' ? 'Netzteil anschließen' : st === 'charging' ? 'Wird geladen' : plugged ? 'Am Netz' : secs && isFinite(secs) ? fmt(secs) + ' verbleibend' : '\u00a0';
+  $('thr-val').textContent = settings.threshold + '%';
+  prog.style.strokeDashoffset = CIRC * (1 - percent / 100);
 
   api.report({
     percent, plugged, secs: isFinite(secs) ? secs : null, state: st,
@@ -98,5 +81,7 @@ async function pollPeriph() {
 }
 if (api.onPeriphRefresh) api.onPeriphRefresh(pollPeriph);
 setInterval(pollPeriph, 60000); setTimeout(pollPeriph, 4000);
+
+if (window.matchMedia) matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { render(); pollPeriph(); });
 
 api.getSettings().then((s) => { settings = s; $('autostart').checked = s.autostart; startSource(); });

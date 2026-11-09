@@ -4,22 +4,23 @@
   const KIND = { mouse: 'Maus', keyboard: 'Tastatur', gamepad: 'Controller', headset: 'Headset', other: 'Gerät' };
   let timer, pinned = new Set();
 
-  function glyphCanvas(kind, tone) {
-    const c = el('canvas'); c.width = c.height = 88; c.style.cssText = 'width:44px;height:44px;flex:none'; const g = c.getContext('2d');
-    drawGlyph(g, kind, 44, 44, 60, tone); return c;
+  function glyphCanvas(kind, tone) { // iOS-App-Symbol: farbige Kachel mit weissem Glyph
+    const c = el('canvas'); c.width = c.height = 96; c.style.cssText = 'width:48px;height:48px;flex:none'; const g = c.getContext('2d');
+    g.fillStyle = tone; g.beginPath(); g.roundRect(0, 0, 96, 96, 22); g.fill(); drawGlyph(g, kind, 48, 48, 56, '#fff'); return c;
   }
   function card(d) {
-    const tone = GLYPH_TONES[batteryTone(d.Battery)];
+    const tone = d.Battery == null ? '#8E8E93' : (d.Battery <= 15 ? '#FF3B30' : d.Battery <= 30 ? '#FF9500' : '#007AFF');
+    const barTone = GLYPH_TONES[batteryTone(d.Battery)];
     const c = el('div', 'card'); const row = el('div', 'row');
     const left = el('div', 'grow'); left.append(el('div', 'name', d.Name), el('div', 'meta', KIND[d.Kind] + ' · ' + d.Bus));
     row.append(glyphCanvas(d.Kind, tone), left);
     const pct = el('div'); pct.style.cssText = 'text-align:right;min-width:90px';
     pct.append(el('div', 'name', d.Battery == null ? '—' : d.Battery + '%'));
     const bar = el('div', 'meter'); bar.style.marginTop = '6px';
-    const fill = el('i'); fill.style.cssText = `width:${d.Battery ?? 0}%;background:${tone}`; bar.append(fill); pct.append(bar);
+    const fill = el('i'); fill.style.cssText = `width:${d.Battery ?? 0}%;background:${barTone}`; bar.append(fill); pct.append(bar);
     if (d.Battery == null) pct.append(el('div', 'meta', 'Akku unbekannt'));
     row.append(pct);
-    const pin = el('button', pinned.has(d.Id) ? 'primary' : 'ghost', pinned.has(d.Id) ? 'In Taskleiste ✓' : 'In Taskleiste'); pin.style.minWidth = '130px';
+    const pin = el('button', pinned.has(d.Id) ? 'primary' : 'ghost', pinned.has(d.Id) ? 'In Taskleiste ✓' : 'In Taskleiste'); pin.style.minWidth = '140px';
     pin.setAttribute('aria-pressed', String(pinned.has(d.Id)));
     pin.onclick = async () => { const on = !pinned.has(d.Id); on ? pinned.add(d.Id) : pinned.delete(d.Id); await api.periphPin(d.Id, on); refresh(); };
     row.append(pin); c.append(row); return c;

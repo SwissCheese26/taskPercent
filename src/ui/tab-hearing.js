@@ -88,17 +88,17 @@
   }
   function draw(rel) {
     const c = $('h-chart'), g = c.getContext('2d'), W = c.width, H = c.height, L = 90, R = 30, T = 30, B = 70;
-    g.clearRect(0, 0, W, H); g.font = '22px "Cascadia Mono", Consolas, monospace'; g.textBaseline = 'middle';
+    g.clearRect(0, 0, W, H); g.font = '22px "Segoe UI", system-ui, sans-serif'; g.textBaseline = 'middle';
     const x = (f) => L + (Math.log2(f / 250) / Math.log2(8000 / 250)) * (W - L - R), MAX = 60, y = (d) => T + (Math.min(d, MAX) / MAX) * (H - T - B);
-    g.strokeStyle = '#222B38'; g.fillStyle = '#566274'; g.lineWidth = 1.5;
+    const cv = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim(); g.strokeStyle = cv('--sep'); g.fillStyle = cv('--text-3'); g.lineWidth = 1.5;
     for (let d = 0; d <= MAX; d += 20) { g.beginPath(); g.moveTo(L, y(d)); g.lineTo(W - R, y(d)); g.stroke(); g.textAlign = 'right'; g.fillText(d + ' dB', L - 12, y(d)); }
     FREQS.forEach((f) => { g.beginPath(); g.moveTo(x(f), T); g.lineTo(x(f), H - B); g.stroke(); g.textAlign = 'center'; g.fillText(f >= 1000 ? f / 1000 + 'k' : f, x(f), H - B + 28); });
-    g.fillStyle = '#8895A7'; g.textAlign = 'left'; g.fillText('↑ leiser hörbar', L + 10, T + 14);
-    [['L', '#5CF2C8', 'Links'], ['R', '#FFB224', 'Rechts']].forEach(([k, col, name], i) => {
-      g.strokeStyle = col; g.fillStyle = col; g.lineWidth = 4; g.shadowColor = col; g.shadowBlur = 14; g.beginPath();
+    g.fillStyle = cv('--text-2'); g.textAlign = 'left'; g.fillText('↑ leiser hörbar', L + 10, T + 14);
+    [['L', cv('--accent'), 'Links'], ['R', cv('--orange'), 'Rechts']].forEach(([k, col, name], i) => {
+      g.strokeStyle = col; g.fillStyle = col; g.lineWidth = 4; g.beginPath();
       FREQS.forEach((f, j) => (j ? g.lineTo(x(f), y(rel(k, f))) : g.moveTo(x(f), y(rel(k, f))))); g.stroke();
       FREQS.forEach((f) => { g.beginPath(); g.arc(x(f), y(rel(k, f)), 8, 0, 7); g.fill(); });
-      g.shadowBlur = 0; g.fillText('● ' + name, W - R - 190 + i * 0, T + 14 + i * 28);
+      g.fillText('● ' + name, W - R - 190 + i * 0, T + 14 + i * 28);
     });
   }
   tabs.hearing = { open() {}, close() { abort = true; stopAudio(); $('h-run').hidden = true; $('h-intro').hidden = false; } };
