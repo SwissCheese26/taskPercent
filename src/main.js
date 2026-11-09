@@ -6,6 +6,7 @@ const admin = require('./admin');
 
 const UI = path.join(__dirname, 'ui');
 const bgColor = () => (nativeTheme.shouldUseDarkColors ? '#1C1C1E' : '#F5F5F7');
+let hiddenAt = 0;
 let tray, flyout, devices, toast, toastTimer, blinkTimer;
 let battery = null;          // letzter Zustand vom Renderer
 let warned = false, blinkOn = false;
@@ -34,7 +35,7 @@ function handleArgs(a) {
   if (a.devices) showDevices();
 }
 
-if (!app.requestSingleInstanceLock()) app.quit();
+if (!app.requestSingleInstanceLock()) { app.quit(); process.exit(0); }
 app.on('second-instance', (_e, argv) => handleArgs(parseArgs(argv.slice(1))));
 
 // ---------- Einstellungen
@@ -54,7 +55,7 @@ function createFlyout() {
     webPreferences: { preload: path.join(__dirname, 'preload.js'), backgroundThrottling: false, contextIsolation: true },
   });
   loadFlyout();
-  flyout.on('blur', () => flyout.hide());
+  flyout.on('blur', () => { flyout.hide(); hiddenAt = Date.now(); });
 }
 function showFlyout() {
   const wa = screen.getDisplayNearestPoint(tray.getBounds()).workArea;
@@ -168,7 +169,7 @@ app.whenReady().then(() => {
   if (first.simulate) sim = first.simulate;
   tray = new Tray(nativeImage.createEmpty());
   tray.setToolTip('taskPercent');
-  tray.on('click', () => (flyout.isVisible() ? flyout.hide() : showFlyout()));
+  tray.on('click', () => { if (flyout.isVisible()) flyout.hide(); else if (Date.now() - hiddenAt > 300) showFlyout(); }); // 300 ms: Klick, der den Blur ausgeloest hat, oeffnet nicht gleich wieder
   tray.setContextMenu(buildMenu());
   createFlyout();
   if (first.testWarning) setTimeout(() => showToast(14), 800);
@@ -180,20 +181,24 @@ app.on('window-all-closed', (e) => e.preventDefault()); // Tray-App bleibt offen
 
 ipcMain.on('battery:report', (_e, b) => onBattery(b));
 ipcMain.handle('settings:get', publicSettings);
-ipcMain.on('settings:set', (_e, s) => {
-  settings.threshold = s.threshold; saveSettings();
-  app.setLoginItemSettings({ openAtLogin: !!s.autostart });
-  warned = false;
+const clampThreshold = (v) => Math.min(30, Math.max(5, Math.round(Number(v) / 5) * 5 || 15));
+function applySettings(s) {
+  if (s.threshold !== undefined) { const t = clampThreshold(s.threshold); if (t !== settings.threshold) warned = false; settings.threshold = t; }
+  if (s.autostart !== undefined) app.setLoginItemSettings({ openAtLogin: !!s.autostart });
+  saveSettings();
   if (battery) onBattery(battery);
-});
+  if (flyout && !flyout.isDestroyed()) flyout.webContents.send('settings:changed', publicSettings());
+}
+ipcMain.on('settings:set', (_e, s) => applySettings(s || {}));
 ipcMain.on('toast:test', () => showToast(battery ? battery.percent : 14));
 ipcMain.on('toast:close', closeToast);
 ipcMain.on('devices:open', () => { flyout.hide(); showDevices(); });
 ipcMain.on('devices:close', () => devices && devices.close());
 // ---------- Audio-Geraete (Lautstaerke / Stummschaltung)
+const validPct = (v) => { const n = Math.round(Number(v)); if (!Number.isFinite(n)) throw new Error('Ungültiger Wert'); return Math.min(100, Math.max(0, n)); };
 const guard = (fn) => async (_e, a) => { try { return { ok: true, data: await fn(a || {}) }; } catch (err) { return { ok: false, error: err.message }; } };
 ipcMain.handle('audio:list', guard(() => native.audio.call('list')));
-ipcMain.handle('audio:volume', guard((a) => native.audio.call('volume', { id: String(a.id), value: Number(a.value) })));
+ipcMain.handle('audio:volume', guard((a) => native.audio.call('volume', { id: String(a.id), value: validPct(a.value) })));
 ipcMain.handle('audio:mute', guard((a) => native.audio.call('mute', { id: String(a.id), value: !!a.value })));
 // ---------- Bluetooth + Admin-Helfer
 ipcMain.handle('bt:list', guard(() => native.bluetooth.call('list')));

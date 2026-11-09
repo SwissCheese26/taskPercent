@@ -2,6 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: blob:; media-src 'self' blob:; style-src 'self' 'unsafe-inline'; script-src 'self'">
 <title>Akku-Warnung</title>
 <link rel="stylesheet" href="tokens.css">
 <style>
@@ -25,9 +26,6 @@
   <div class="txt"><h1>Akku schwach</h1><p>Bitte jetzt das Netzteil anschließen.</p></div>
   <div class="pct"><span id="p">--</span>%</div>
 </div>
-<script>
-  document.getElementById('p').textContent = new URLSearchParams(location.search).get('p') || '--';
-  document.getElementById('card').onclick = () => window.api && window.api.closeToast();
-</script>
+<script src="toast.js"></script>
 </body>
 </html>

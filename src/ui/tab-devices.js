@@ -7,7 +7,7 @@
     const c = el('div', 'card' + (d.Volume < 0 ? ' dim' : ''));
     const top = el('div', 'row between');
     const left = el('div', 'grow');
-    left.append(el('div', 'name', d.Name), el('div', 'meta', d.Flow === 'render' ? 'Wiedergabe' : 'Aufnahme'));
+    left.append(el('div', 'name', esc(d.Name)), el('div', 'meta', d.Flow === 'render' ? 'Wiedergabe' : 'Aufnahme'));
     const right = el('div', 'row');
     if (d.IsDefault) right.append(el('span', 'badge on', 'Standard'));
     top.append(left, right); c.append(top);
@@ -36,20 +36,20 @@
     const choice = await ask({ title: 'Einmalige Admin-Freigabe', html: EXPLAIN, buttons: [{ label: 'Abbrechen', value: false }, { label: 'Einmalig freigeben', primary: true, value: true }] });
     if (!choice) return false;
     const r = await api.adminSetup();
-    if (!r.ok) { await ask({ title: 'Freigabe nicht erteilt', html: '<p>' + r.error + '</p>', buttons: [{ label: 'OK', primary: true, value: 1 }] }); return false; }
+    if (!r.ok) { await ask({ title: 'Freigabe nicht erteilt', html: '<p>' + esc(r.error) + '</p>', buttons: [{ label: 'OK', primary: true, value: 1 }] }); return false; }
     adminOk = true; return true;
   }
   function btCard(d) {
     const c = el('div', 'card');
     const row = el('div', 'row between'); const left = el('div', 'grow');
-    left.append(el('div', 'name', d.Name), el('div', 'meta', 'Bluetooth'));
+    left.append(el('div', 'name', esc(d.Name)), el('div', 'meta', 'Bluetooth'));
     const badge = el('span', 'badge' + (d.Connected ? ' on' : ''), d.Connected ? 'Verbunden' : d.Disabled ? 'Getrennt' : 'Nicht verbunden');
     const btn = el('button', d.Connected ? 'ghost' : 'primary', d.Connected ? 'Trennen' : 'Verbinden');
     btn.onclick = async () => {
       if (!(await ensureAdmin())) return;
       btn.disabled = true; btn.textContent = '…';
       const r = await api.btAction(d.Id, d.Connected ? 'disconnect' : 'connect');
-      if (!r.ok) await ask({ title: 'Aktion fehlgeschlagen', html: '<p>' + r.error + '</p>', buttons: [{ label: 'OK', primary: true, value: 1 }] });
+      if (!r.ok) await ask({ title: 'Aktion fehlgeschlagen', html: '<p>' + esc(r.error) + '</p>', buttons: [{ label: 'OK', primary: true, value: 1 }] });
       refreshBt();
     };
     row.append(left, badge, btn); c.append(row); return c;
@@ -57,7 +57,7 @@
   async function refreshBt() {
     const box = $('bt-root'); const r = await api.btList();
     box.innerHTML = '';
-    if (!r.ok) { box.append(el('p', 'note', 'Bluetooth konnte nicht gelesen werden: ' + r.error)); return; }
+    if (!r.ok) { box.append(el('p', 'note', 'Bluetooth konnte nicht gelesen werden: ' + esc(r.error))); return; }
     if (!r.data.length) { box.append(el('p', 'note', 'Keine gekoppelten Bluetooth-Geräte gefunden.')); return; }
     r.data.forEach((d) => box.append(btCard(d)));
   }

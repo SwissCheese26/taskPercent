@@ -10,9 +10,12 @@ if ($Remove) {
     exit 0
 }
 
+# Ein vorab von einem Benutzer angelegter Ordner koennte ihm weiter gehoeren -> erst entfernen, dann frisch und als Administrator anlegen
+if (Test-Path $base) { Remove-Item -Recurse -Force $base }
 New-Item -ItemType Directory -Force -Path $base, (Join-Path $base 'requests'), (Join-Path $base 'results') | Out-Null
 Copy-Item -Force -Path $Source -Destination (Join-Path $base 'helper.ps1')
 
+icacls $base /setowner '*S-1-5-32-544' | Out-Null
 # Basisordner + Skript: Benutzer duerfen NUR lesen (sonst waere der erhoehte Helfer manipulierbar)
 icacls $base /inheritance:r /grant:r '*S-1-5-18:(OI)(CI)F' '*S-1-5-32-544:(OI)(CI)F' '*S-1-5-32-545:(OI)(CI)RX' | Out-Null
 # requests/results: Benutzer duerfen Dateien anlegen/lesen (aber Skript bleibt geschuetzt)

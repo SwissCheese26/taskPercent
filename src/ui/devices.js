@@ -45,6 +45,7 @@ function ask({ title, html, buttons }) {
 }
 // Slider-Fuellung (CSS-Variable) aktuell halten
 function paintRange(r) { r.style.setProperty('--p', ((r.value - r.min) / (r.max - r.min)) * 100 + '%'); }
+function esc(s) { return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 function el(tag, cls, html) { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; }
 
 // BiquadFilter erzeugen (frequency/gain sind AudioParams, nicht direkt zuweisbar)

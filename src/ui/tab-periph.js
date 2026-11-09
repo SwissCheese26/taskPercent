@@ -12,7 +12,7 @@
     const tone = d.Battery == null ? '#8E8E93' : (d.Battery <= 15 ? '#FF3B30' : d.Battery <= 30 ? '#FF9500' : '#007AFF');
     const barTone = GLYPH_TONES[batteryTone(d.Battery)];
     const c = el('div', 'card'); const row = el('div', 'row');
-    const left = el('div', 'grow'); left.append(el('div', 'name', d.Name), el('div', 'meta', KIND[d.Kind] + ' · ' + d.Bus));
+    const left = el('div', 'grow'); left.append(el('div', 'name', esc(d.Name)), el('div', 'meta', KIND[d.Kind] + ' · ' + d.Bus));
     row.append(glyphCanvas(d.Kind, tone), left);
     const pct = el('div'); pct.style.cssText = 'text-align:right;min-width:90px';
     pct.append(el('div', 'name', d.Battery == null ? '—' : d.Battery + '%'));
