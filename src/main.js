@@ -114,7 +114,7 @@ function syncPeriph(items) { // items: [{id, name, kind, bus, battery, icons:{no
     }
     e.data = it;
     e.tray.setImage(img(it.icons.normal));
-    e.tray.setToolTip(`${it.name}${it.battery == null ? '' : ' – Akku ' + it.battery + '%'}`);
+    e.tray.setToolTip(`${it.name}${it.battery != null ? ' – Akku ' + it.battery + '%' : it.wired ? ' – kabelgebunden' : ''}`);
     const low = it.battery != null && it.battery <= 15;
     if (low && !e.blink) e.blink = setInterval(() => { e.on = !e.on; e.tray.setImage(img(e.on ? e.data.icons.alt : e.data.icons.normal)); }, 700);
     if (!low && e.blink) { clearInterval(e.blink); e.blink = null; e.on = false; }

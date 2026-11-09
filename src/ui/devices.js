@@ -16,7 +16,9 @@ const api = window.api || { // Browser-Vorschau ohne Electron: Demo-Daten
     { Id: 'k', Name: 'Keychron K8', Kind: 'keyboard', Bus: 'Bluetooth', Battery: 27 },
     { Id: 'g', Name: 'Xbox Wireless Controller', Kind: 'gamepad', Bus: 'Bluetooth', Battery: 9 },
     { Id: 'h', Name: 'WH-1000XM5', Kind: 'headset', Bus: 'Bluetooth', Battery: 64 },
-    { Id: 'w', Name: 'Logitech Webcam', Kind: 'other', Bus: 'USB', Battery: null } ] }),
+    { Id: 'w', Name: 'Logitech Webcam', Kind: 'camera', Bus: 'USB', Battery: null, Wired: true },
+    { Id: 'u', Name: 'Logitech G502 Maus', Kind: 'mouse', Bus: 'USB', Battery: null, Wired: true },
+    { Id: 'v', Name: 'Das Keyboard 4', Kind: 'keyboard', Bus: 'USB', Battery: null, Wired: true } ] }),
   onDevicesTab() {}, periphPin: async () => ({ ok: true }), periphPinned: async () => ({ ok: true, data: ['k'] }),
   presetList: async () => ({ ok: true, data: { active: 'meeting', canUndo: true, presets: [
     { id: 'meeting', name: 'Meeting', color: '#007AFF', icon: 'video', desc: 'Ruhiger Pegel, Mikro an, Stimmen im Fokus', summary: 'Warnung 20% · Ausgabe 55% · Mikro 85%' },

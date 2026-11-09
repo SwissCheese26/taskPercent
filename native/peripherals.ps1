@@ -7,13 +7,14 @@ $skip = 'PS/2|Remote|Virtual|Root|Terminal|Hyper-V|Synaptics Pointing'
 function Get-Kind($class, $name) {
     if ($name -match 'controller|gamepad|xbox|dualsense|dualshock|joy-?con') { return 'gamepad' }
     if ($name -match 'head(set|phone)|buds|airpods|wh-|wf-|earbud|kopfh') { return 'headset' }
+    if ($class -in 'Camera', 'Image') { return 'camera' }
     if ($class -eq 'Mouse' -or $name -match 'mouse|maus|trackpad|trackball') { return 'mouse' }
     if ($class -eq 'Keyboard' -or $name -match 'keyboard|tastatur') { return 'keyboard' }
     return 'other'
 }
 function Get-Peripherals {
     $seen = @{}; $list = @()
-    foreach ($class in 'Mouse', 'Keyboard', 'Bluetooth', 'HIDClass') {
+    foreach ($class in 'Mouse', 'Keyboard', 'Bluetooth', 'HIDClass', 'Camera', 'Image') {
         foreach ($d in (Get-PnpDevice -Class $class -PresentOnly -ErrorAction SilentlyContinue)) {
             if ($d.Status -ne 'OK' -or -not $d.FriendlyName) { continue }
             if ($class -eq 'Bluetooth' -and $d.InstanceId -notmatch '^(BTHENUM|BTHLE)\\DEV_') { continue }
@@ -26,7 +27,7 @@ function Get-Peripherals {
             if ($seen.ContainsKey($key)) { continue }; $seen[$key] = $true
             $p = Get-PnpDeviceProperty -InstanceId $d.InstanceId -KeyName $battKey -ErrorAction SilentlyContinue
             $batt = if ($p -and $p.Data -ne $null -and $p.Type -ne 'Empty') { [int]$p.Data } else { $null }
-            $list += [pscustomobject]@{ Id = $d.InstanceId; Name = $name; Kind = $kind; Bus = $bus; Battery = $batt }
+            $list += [pscustomobject]@{ Id = $d.InstanceId; Name = $name; Kind = $kind; Bus = $bus; Battery = $batt; Wired = ($bus -ne 'Bluetooth' -and $null -eq $batt) }
         }
     }
     return $list

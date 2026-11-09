@@ -74,8 +74,8 @@ async function pollPeriph() {
   const p = await api.periphPinned(); if (!p.ok || !p.data.length) return api.periphReport([]);
   const r = await api.periphList(); if (!r.ok) return;
   const items = r.data.filter((d) => p.data.includes(d.Id)).map((d) => ({
-    id: d.Id, name: d.Name, kind: d.Kind, bus: d.Bus, battery: d.Battery,
-    icons: { normal: drawDeviceTrayIcon(d.Kind, d.Battery, false), alt: drawDeviceTrayIcon(d.Kind, d.Battery, true) },
+    id: d.Id, name: d.Name, kind: d.Kind, bus: d.Bus, battery: d.Battery, wired: !!d.Wired,
+    icons: { normal: drawDeviceTrayIcon(d.Kind, d.Battery, false, d.Wired), alt: drawDeviceTrayIcon(d.Kind, d.Battery, true, d.Wired) },
   }));
   api.periphReport(items);
 }
