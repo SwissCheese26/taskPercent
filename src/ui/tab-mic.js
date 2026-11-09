@@ -64,8 +64,8 @@
     ctx = new AudioContext(); const n = {};
     n.src = ctx.createMediaStreamSource(stream);
     n.gain = ctx.createGain();
-    n.bass = Object.assign(ctx.createBiquadFilter(), { type: 'lowshelf', frequency: 200 });
-    n.treble = Object.assign(ctx.createBiquadFilter(), { type: 'highshelf', frequency: 4000 });
+    n.bass = biquad(ctx, 'lowshelf', 200);
+    n.treble = biquad(ctx, 'highshelf', 4000);
     n.mix = ctx.createGain();
     n.delay = ctx.createDelay(1.0); n.fb = ctx.createGain(); n.echoWet = ctx.createGain();
     n.conv = Object.assign(ctx.createConvolver(), { buffer: impulse(ctx) }); n.revWet = ctx.createGain();

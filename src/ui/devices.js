@@ -39,3 +39,6 @@ function ask({ title, html, buttons }) {
 // Slider-Fuellung (CSS-Variable) aktuell halten
 function paintRange(r) { r.style.setProperty('--p', ((r.value - r.min) / (r.max - r.min)) * 100 + '%'); }
 function el(tag, cls, html) { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; }
+
+// BiquadFilter erzeugen (frequency/gain sind AudioParams, nicht direkt zuweisbar)
+function biquad(ctx, type, freq, q) { const f = ctx.createBiquadFilter(); f.type = type; f.frequency.value = freq; if (q) f.Q.value = q; return f; }
