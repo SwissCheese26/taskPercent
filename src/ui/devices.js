@@ -47,7 +47,7 @@ function ask({ title, html, buttons }) {
     const box = $('modal-actions'); box.innerHTML = '';
     buttons.forEach((b) => {
       const el = document.createElement('button'); el.className = b.primary ? 'primary' : 'ghost'; el.textContent = b.label;
-      el.onclick = () => { $('modal').hidden = true; resolve(b.value); }; box.appendChild(el);
+      el.onclick = () => { const m = $('modal'); m.classList.add('closing'); setTimeout(() => { m.hidden = true; m.classList.remove('closing'); }, 170); resolve(b.value); }; box.appendChild(el);
     });
     $('modal').hidden = false; box.lastChild.focus();
   });

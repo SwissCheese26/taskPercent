@@ -22,6 +22,10 @@ npm run dist              # portable .exe in dist/
 - **Warnung** (≤ Schwelle, nicht am Netzteil): blinkendes Icon, Windows-Benachrichtigung und eigener Toast unten rechts mit ablaufendem Balken. Neu scharf erst bei Schwelle + 5 % oder nach dem Einstecken.
 - Win11 versteckt neue Tray-Icons im `^`-Überlauf – einmal in die Taskleiste ziehen.
 
+## Voreinstellungen
+Meeting, Gaming, Musik, Unterwegs, Nacht, Hörtest – ein Klick setzt Warnschwelle, Lautstärke/Stumm von Standard-Lautsprecher und -Mikrofon sowie die gepinnten Tray-Icons. Eigene Voreinstellungen lassen sich sichern, jede Änderung ist rückgängig zu machen.
+Auch per Tray-Menü oder `npx taskpercent preset Meeting`. Mikrofon-/Klang-Teile (Effekte, EQ) sind eine Vorschau in der App.
+
 ## Geräte verwalten (Flyout → „Geräte verwalten", oder `npx taskpercent devices`)
 - **Geräte:** Lautstärke und Stummschaltung aller Wiedergabe-/Aufnahmegeräte, Bluetooth-Geräte trennen/verbinden.
 - **Mikrofon-Labor:** Pegelanzeige, Live-Test, 5-s-Aufnahme mit Wiedergabe, Echo, Hall, Bass, Höhen, Rauschunterdrückung.

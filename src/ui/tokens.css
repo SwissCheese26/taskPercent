@@ -38,3 +38,20 @@ body { --tone: var(--green); }
 * { box-sizing: border-box; margin: 0; }
 html, body { background: var(--bg); color: var(--text); font: 400 14px/1.4 var(--font); -webkit-font-smoothing: antialiased; user-select: none; overflow: hidden; }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+
+/* ---- apple-design: Rueckmeldung, Bewegung, Material, Barrierefreiheit ---- */
+:root { --spring: cubic-bezier(.2, .9, .25, 1); --material: color-mix(in srgb, var(--surface) 72%, transparent); }
+button { transition: transform var(--t-fast) var(--spring), background var(--t-fast), filter var(--t-fast), opacity var(--t-fast); touch-action: manipulation; }
+button:active:not(:disabled) { transform: scale(.97); }          /* Feedback beim Druecken, nicht erst beim Loslassen */
+.card, .item { transition: transform var(--t-med) var(--spring), box-shadow var(--t-med); }
+/* Typografie: grosse Schrift enger, kleine etwas offener; Zeilenhoehe umgekehrt zur Groesse */
+h1, .title, .num, .big { letter-spacing: -.022em; line-height: 1.1; }
+h2 { letter-spacing: -.014em; line-height: 1.2; }
+.meta, .note, .sub, h3 { letter-spacing: .005em; line-height: 1.5; }
+@media (prefers-reduced-transparency: reduce) { :root { --material: var(--surface); } .modal, .rail { backdrop-filter: none !important; } }
+@media (prefers-contrast: more) {
+  :root { --sep: rgba(0,0,0,.45); --text-2: #3A3A3C; }
+  @media (prefers-color-scheme: dark) { :root { --sep: rgba(255,255,255,.55); --text-2: #D1D1D6; } }
+  .card, .list { outline: 1px solid var(--sep); }
+}
+@media (prefers-reduced-motion: reduce) { button:active:not(:disabled) { transform: none; } }
