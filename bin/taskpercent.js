@@ -10,12 +10,13 @@ if (args.includes('-h') || args.includes('--help')) {
   taskpercent              Startet die App im Tray
   taskpercent show         Öffnet das Flyout
   taskpercent devices      Öffnet die Geräteverwaltung
+  taskpercent preset <Name>  Voreinstellung aktivieren (Meeting, Gaming, Musik, Unterwegs, Nacht, Hörtest)
   taskpercent test         Zeigt die Warnung zum Ausprobieren
   taskpercent quit         Beendet die laufende Instanz
   --simulate <N>[c]        Akku simulieren (z.B. 14 oder 60c = 60 % am Netz)`);
   process.exit(0);
 }
-const cmd = { start: [], show: ['--show'], test: ['--test-warning'], devices: ['--devices'], quit: ['--quit'] }[args[0]];
+const cmd = { start: [], show: ['--show'], test: ['--test-warning'], devices: ['--devices'], preset: ['--preset'], quit: ['--quit'] }[args[0]];
 const pass = cmd ? args.slice(1) : args;
 const electron = require('electron');
 spawn(electron, [path.join(__dirname, '..'), ...(cmd || []), ...pass], { detached: true, stdio: 'ignore' }).unref();

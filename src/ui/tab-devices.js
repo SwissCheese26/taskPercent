@@ -86,5 +86,4 @@
     }
   }
   tabs.devices = { open() { adminCard(); refreshBt(); refreshAudio(); clearInterval(timer); timer = setInterval(refreshAudio, 4000); }, close() { clearInterval(timer); } };
-  tabs.devices.open();
 })();

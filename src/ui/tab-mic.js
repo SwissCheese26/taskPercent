@@ -127,5 +127,5 @@
     const iv = setInterval(() => { left--; btn.textContent = 'Aufnahme… ' + left; if (left <= 0) { clearInterval(iv); setTimeout(() => mr.stop(), P.echoTime || P.reverb ? 1500 : 200); btn.textContent = 'Fertig…'; } }, 1000);
   };
 
-  tabs.mic = { open() { listDevices(); }, close() { closeMic(); const a = $('mic-play'); a.pause(); } };
+  tabs.mic = { open() { listDevices(); api.fxGet().then((r) => { const n = r.ok && r.data.mic; if (n) [...document.querySelectorAll('#mic-presets button')].find((b) => b.textContent === n)?.click(); }); }, close() { closeMic(); const a = $('mic-play'); a.pause(); } };
 })();

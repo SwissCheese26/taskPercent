@@ -12,7 +12,8 @@
   <aside class="rail">
     <div class="brand"><i class="dot"></i>taskPercent</div>
     <nav role="tablist" aria-label="Bereiche">
-      <button role="tab" data-tab="devices" aria-selected="true"><span class="ico" style="background:#007AFF"><svg viewBox="0 0 24 24"><path d="M4 14v-2a8 8 0 0 1 16 0v2"/><rect x="3" y="14" width="4" height="6" rx="1.5"/><rect x="17" y="14" width="4" height="6" rx="1.5"/></svg></span>Geräte</button>
+      <button role="tab" data-tab="presets" aria-selected="true"><span class="ico" style="background:#5856D6"><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg></span>Voreinstellungen</button>
+      <button role="tab" data-tab="devices" aria-selected="false"><span class="ico" style="background:#007AFF"><svg viewBox="0 0 24 24"><path d="M4 14v-2a8 8 0 0 1 16 0v2"/><rect x="3" y="14" width="4" height="6" rx="1.5"/><rect x="17" y="14" width="4" height="6" rx="1.5"/></svg></span>Geräte</button>
       <button role="tab" data-tab="periph"><span class="ico" style="background:#34C759"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="3"/><path d="M7 10h.01M11 10h.01M15 10h.01M7 14h10"/></svg></span>Peripherie</button>
       <button role="tab" data-tab="mic"><span class="ico" style="background:#FF9500"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></span>Mikrofon</button>
       <button role="tab" data-tab="hearing"><span class="ico" style="background:#AF52DE"><svg viewBox="0 0 24 24"><path d="M7 9a5 5 0 0 1 10 0c0 3-3 3.5-3 6.5a2.5 2.5 0 0 1-5 0"/><path d="M12 9.5a1.5 1.5 0 0 1 3 0"/></svg></span>Hörtest</button>
@@ -22,7 +23,8 @@
   </aside>
 
   <main>
-    <section class="panel" id="tab-devices" role="tabpanel"><h1>Geräte</h1><p class="lead" id="devices-lead">Lade…</p><div id="devices-root"></div></section>
+    <section class="panel" id="tab-presets" role="tabpanel"><h1>Voreinstellungen</h1><p class="lead">Ein Klick setzt Warnschwelle, Lautstärke, Mikrofon und Taskleisten-Icons passend zur Situation.</p><div id="presets-root"></div></section>
+    <section class="panel" id="tab-devices" role="tabpanel" hidden><h1>Geräte</h1><p class="lead" id="devices-lead">Lade…</p><div id="devices-root"></div></section>
     <section class="panel" id="tab-periph" role="tabpanel" hidden><h1>Peripherie</h1><p class="lead" id="periph-lead">Lade…</p><div id="periph-root"></div></section>
     <section class="panel" id="tab-mic" role="tabpanel" hidden><h1>Mikrofon-Labor</h1><div id="mic-root"></div></section>
     <section class="panel" id="tab-hearing" role="tabpanel" hidden><h1>Hörtest</h1><div id="hearing-root"></div></section>
@@ -36,6 +38,7 @@
 
 <script src="device-glyph.js"></script>
 <script src="devices.js"></script>
+<script src="tab-presets.js"></script>
 <script src="tab-devices.js"></script>
 <script src="tab-periph.js"></script>
 <script src="tab-mic.js"></script>

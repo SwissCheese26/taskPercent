@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const native = require('./native');
 const admin = require('./admin');
+const { BUILTIN } = require('./presets');
 
 const UI = path.join(__dirname, 'ui');
 const bgColor = () => (nativeTheme.shouldUseDarkColors ? '#1C1C1E' : '#F5F5F7');
@@ -11,7 +12,7 @@ let tray, flyout, devices, toast, toastTimer, blinkTimer;
 let battery = null;          // letzter Zustand vom Renderer
 let warned = false, blinkOn = false;
 let sim = null;              // --simulate Wert
-let settings = { threshold: 15, pinned: [] };
+let settings = { threshold: 15, pinned: [], presets: [], activePreset: null, fx: {} };
 const settingsFile = () => path.join(app.getPath('userData'), 'settings.json');
 
 // ---------- CLI-Argumente (auch von einer zweiten Instanz)
@@ -22,6 +23,7 @@ function parseArgs(argv) {
     else if (argv[i].startsWith('--simulate=')) out.simulate = argv[i].split('=')[1];
     else if (argv[i] === '--test-warning') out.testWarning = true;
     else if (argv[i] === '--show') out.show = true;
+    else if (argv[i] === '--preset') out.preset = argv[++i];
     else if (argv[i] === '--devices') out.devices = true;
     else if (argv[i] === '--quit') out.quit = true;
   }
@@ -32,6 +34,7 @@ function handleArgs(a) {
   if (a.simulate) { sim = a.simulate; loadFlyout(); }
   if (a.testWarning) showToast(battery ? battery.percent : 14);
   if (a.show) showFlyout();
+  if (a.preset) { const p = allPresets().find((x) => x.name.toLowerCase() === String(a.preset).toLowerCase() || x.id === a.preset); if (p) applyPreset(p.id).catch(() => {}); }
   if (a.devices) showDevices();
 }
 
@@ -40,7 +43,7 @@ app.on('second-instance', (_e, argv) => handleArgs(parseArgs(argv.slice(1))));
 
 // ---------- Einstellungen
 function loadSettings() { try { settings = { ...settings, ...JSON.parse(fs.readFileSync(settingsFile(), 'utf8')) }; } catch {} }
-function saveSettings() { try { fs.writeFileSync(settingsFile(), JSON.stringify({ threshold: settings.threshold, pinned: settings.pinned })); } catch {} }
+function saveSettings() { try { fs.writeFileSync(settingsFile(), JSON.stringify({ threshold: settings.threshold, pinned: settings.pinned, presets: settings.presets, activePreset: settings.activePreset, fx: settings.fx })); } catch {} }
 const publicSettings = () => ({ threshold: settings.threshold, autostart: app.getLoginItemSettings().openAtLogin });
 
 // ---------- Fenster
@@ -156,6 +159,7 @@ function buildMenu() {
   return Menu.buildFromTemplate([
     { label: 'Öffnen', click: showFlyout },
     { label: 'Geräte verwalten…', click: () => showDevices() },
+    { label: 'Voreinstellungen', submenu: allPresets().map((p) => ({ label: p.name, type: 'radio', checked: p.id === settings.activePreset, click: () => applyPreset(p.id).catch(() => {}) })) },
     { label: 'Warnung testen', click: () => showToast(battery ? battery.percent : 14) },
     { type: 'separator' },
     { label: 'Beenden', click: () => app.quit() },
@@ -173,6 +177,7 @@ app.whenReady().then(() => {
   tray.setContextMenu(buildMenu());
   createFlyout();
   if (first.testWarning) setTimeout(() => showToast(14), 800);
+  if (first.preset) setTimeout(() => handleArgs({ preset: first.preset }), 1500);
   if (first.devices) showDevices();
   if (first.show) flyout.once('ready-to-show', showFlyout);
 });
@@ -190,6 +195,85 @@ function applySettings(s) {
   if (flyout && !flyout.isDestroyed()) flyout.webContents.send('settings:changed', publicSettings());
 }
 ipcMain.on('settings:set', (_e, s) => applySettings(s || {}));
+// ---------- Voreinstellungen
+let undoSnap = null;
+const allPresets = () => [...BUILTIN, ...(settings.presets || []).map((p) => ({ ...p, custom: true }))];
+async function defaults() {
+  const list = await native.audio.call('list');
+  return { out: list.find((d) => d.Flow === 'render' && d.IsDefault), inp: list.find((d) => d.Flow === 'capture' && d.IsDefault) };
+}
+async function snapshot() {
+  const snap = { threshold: settings.threshold, pinned: [...settings.pinned], fx: { ...settings.fx }, active: settings.activePreset, audio: [] };
+  try { const { out, inp } = await defaults(); for (const d of [out, inp]) if (d && d.Volume >= 0) snap.audio.push({ id: d.Id, volume: d.Volume, muted: d.Muted }); } catch {}
+  return snap;
+}
+const refreshPeriph = () => { if (flyout && !flyout.isDestroyed()) flyout.webContents.send('periph:refresh'); };
+function broadcastPresets() {
+  if (devices && !devices.isDestroyed()) devices.webContents.send('presets:changed');
+  if (tray) tray.setContextMenu(buildMenu());
+}
+async function setAudio(id, { volume, muted }) {
+  if (volume !== undefined) await native.audio.call('volume', { id, value: validPct(volume) });
+  if (muted !== undefined) await native.audio.call('mute', { id, value: !!muted });
+}
+async function applyPreset(id) {
+  const p = allPresets().find((x) => x.id === id);
+  if (!p) throw new Error('Voreinstellung nicht gefunden');
+  undoSnap = await snapshot();
+  const notes = [];
+  if (p.threshold != null) applySettings({ threshold: p.threshold });
+  if (p.output || p.input) {
+    try {
+      const { out, inp } = await defaults();
+      if (p.output && out) await setAudio(out.Id, p.output); else if (p.output) notes.push('Kein Standard-Lautsprecher gefunden');
+      if (p.input && inp) await setAudio(inp.Id, p.input); else if (p.input) notes.push('Kein Standard-Mikrofon gefunden');
+    } catch (e) { notes.push('Audio: ' + e.message); }
+  }
+  if (p.pinKinds || p.pinIds) {
+    try {
+      let ids = p.pinIds || [];
+      if (p.pinKinds) {
+        const list = await native.peripherals.call('list');
+        ids = list.filter((d) => p.pinKinds.includes(d.Kind) || (p.pinKinds.includes('battery') && d.Battery != null)).map((d) => d.Id);
+      }
+      settings.pinned = ids; refreshPeriph();
+    } catch (e) { notes.push('Peripherie: ' + e.message); }
+  }
+  if (p.fx) settings.fx = { ...p.fx };
+  settings.activePreset = id; saveSettings(); broadcastPresets();
+  return { notes, canUndo: true };
+}
+async function undoPreset() {
+  if (!undoSnap) throw new Error('Nichts rückgängig zu machen');
+  const s = undoSnap; undoSnap = null;
+  applySettings({ threshold: s.threshold });
+  for (const a of s.audio) { try { await setAudio(a.id, { volume: a.volume, muted: a.muted }); } catch {} }
+  settings.pinned = s.pinned; settings.fx = s.fx; settings.activePreset = s.active; saveSettings(); refreshPeriph(); broadcastPresets();
+  return {};
+}
+async function savePreset(name) {
+  name = String(name || '').trim().slice(0, 30); if (!name) throw new Error('Bitte einen Namen eingeben');
+  const snap = await snapshot();
+  const [o, i] = snap.audio;
+  const preset = { id: 'c' + Date.now(), name, color: '#8E8E93', icon: 'star', desc: 'Eigene Voreinstellung', threshold: snap.threshold, pinIds: snap.pinned, fx: snap.fx };
+  if (o) preset.output = { volume: o.volume, muted: o.muted };
+  if (i) preset.input = { volume: i.volume, muted: i.muted };
+  settings.presets = [...(settings.presets || []), preset]; settings.activePreset = preset.id; saveSettings(); broadcastPresets();
+  return {};
+}
+function deletePreset(id) {
+  settings.presets = (settings.presets || []).filter((p) => p.id !== id);
+  if (settings.activePreset === id) settings.activePreset = null;
+  saveSettings(); broadcastPresets();
+}
+const describe = (p) => [p.threshold != null && `Warnung ${p.threshold}%`, p.output && (p.output.muted ? 'Ausgabe stumm' : p.output.volume != null && `Ausgabe ${p.output.volume}%`), p.input && (p.input.muted ? 'Mikro stumm' : p.input.volume != null && `Mikro ${p.input.volume}%`)].filter(Boolean).join(' · ');
+ipcMain.handle('preset:list', async () => ({ ok: true, data: { presets: allPresets().map((p) => ({ ...p, summary: describe(p) })), active: settings.activePreset, canUndo: !!undoSnap } }));
+ipcMain.handle('preset:apply', guard((a) => applyPreset(String(a.id))));
+ipcMain.handle('preset:undo', guard(() => undoPreset()));
+ipcMain.handle('preset:save', guard((a) => savePreset(a.name)));
+ipcMain.handle('preset:delete', guard((a) => deletePreset(String(a.id))));
+ipcMain.handle('fx:get', async () => ({ ok: true, data: settings.fx || {} }));
+
 ipcMain.on('toast:test', () => showToast(battery ? battery.percent : 14));
 ipcMain.on('toast:close', closeToast);
 ipcMain.on('devices:open', () => { flyout.hide(); showDevices(); });

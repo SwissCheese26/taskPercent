@@ -18,6 +18,15 @@ const api = window.api || { // Browser-Vorschau ohne Electron: Demo-Daten
     { Id: 'h', Name: 'WH-1000XM5', Kind: 'headset', Bus: 'Bluetooth', Battery: 64 },
     { Id: 'w', Name: 'Logitech Webcam', Kind: 'other', Bus: 'USB', Battery: null } ] }),
   onDevicesTab() {}, periphPin: async () => ({ ok: true }), periphPinned: async () => ({ ok: true, data: ['k'] }),
+  presetList: async () => ({ ok: true, data: { active: 'meeting', canUndo: true, presets: [
+    { id: 'meeting', name: 'Meeting', color: '#007AFF', icon: 'video', desc: 'Ruhiger Pegel, Mikro an, Stimmen im Fokus', summary: 'Warnung 20% · Ausgabe 55% · Mikro 85%' },
+    { id: 'gaming', name: 'Gaming', color: '#AF52DE', icon: 'game', desc: 'Lauter, Controller- und Headset-Akku im Blick', summary: 'Warnung 15% · Ausgabe 70% · Mikro 80%' },
+    { id: 'music', name: 'Musik', color: '#FF2D55', icon: 'music', desc: 'Moderate Lautstärke, Mikro aus, mehr Bass', summary: 'Ausgabe 45% · Mikro stumm' },
+    { id: 'travel', name: 'Unterwegs', color: '#34C759', icon: 'bolt', desc: 'Früheste Warnung, alle Akkus sichtbar', summary: 'Warnung 30% · Ausgabe 35% · Mikro stumm' },
+    { id: 'night', name: 'Nacht', color: '#5856D6', icon: 'moon', desc: 'Sehr leise, Bass gedämpft, Mikro aus', summary: 'Warnung 20% · Ausgabe 15% · Mikro stumm' },
+    { id: 'c1', name: 'Mein Setup', color: '#8E8E93', icon: 'star', desc: 'Eigene Voreinstellung', summary: 'Warnung 15% · Ausgabe 40%', custom: true } ] } }),
+  presetApply: async () => ({ ok: true, data: { notes: [], canUndo: true } }), presetUndo: async () => ({ ok: true }), presetSave: async () => ({ ok: true }), presetDelete: async () => ({ ok: true }),
+  fxGet: async () => ({ ok: true, data: {} }), onPresetsChanged() {},
   audioVolume: async () => ({ ok: true }), audioMute: async () => ({ ok: true }),
 };
 const tabs = {}; // Feature-Module registrieren sich hier: tabs.mic = { open(), close() }
@@ -52,5 +61,5 @@ function el(tag, cls, html) { const e = document.createElement(tag); if (cls) e.
 function biquad(ctx, type, freq, q) { const f = ctx.createBiquadFilter(); f.type = type; f.frequency.value = freq; if (q) f.Q.value = q; return f; }
 
 // Tab per Query (?tab=periph) oder per IPC oeffnen
-document.addEventListener('DOMContentLoaded', () => { const t = new URLSearchParams(location.search).get('tab'); if (t && tabs[t]) showTab(t); });
+document.addEventListener('DOMContentLoaded', () => { const t = new URLSearchParams(location.search).get('tab'); showTab(t && tabs[t] ? t : 'presets'); });
 if (api.onDevicesTab) api.onDevicesTab((t) => tabs[t] && showTab(t));

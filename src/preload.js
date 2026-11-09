@@ -22,5 +22,12 @@ contextBridge.exposeInMainWorld('api', {
   onPeriphRefresh: (cb) => ipcRenderer.on('periph:refresh', cb),
   onDevicesTab: (cb) => ipcRenderer.on('devices:tab', (_e, t) => cb(t)),
   periphList: () => ipcRenderer.invoke('periph:list'),
+  presetList: () => ipcRenderer.invoke('preset:list'),
+  presetApply: (id) => ipcRenderer.invoke('preset:apply', { id }),
+  presetUndo: () => ipcRenderer.invoke('preset:undo'),
+  presetSave: (name) => ipcRenderer.invoke('preset:save', { name }),
+  presetDelete: (id) => ipcRenderer.invoke('preset:delete', { id }),
+  fxGet: () => ipcRenderer.invoke('fx:get'),
+  onPresetsChanged: (cb) => ipcRenderer.on('presets:changed', cb),
   quit: () => ipcRenderer.send('app:quit'),
 });

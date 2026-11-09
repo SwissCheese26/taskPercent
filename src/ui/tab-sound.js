@@ -108,5 +108,5 @@
       raf = requestAnimationFrame(tick);
     }; cancelAnimationFrame(raf); tick();
   }
-  tabs.sound = { open() {}, close() { stop(); cancelAnimationFrame(raf); if (ctx) ctx.close(); ctx = null; } };
+  tabs.sound = { open() { api.fxGet().then((r) => { const n = r.ok && r.data.eq; if (n) [...document.querySelectorAll('#s-presets button')].find((b) => b.textContent === n)?.click(); }); }, close() { stop(); cancelAnimationFrame(raf); if (ctx) ctx.close(); ctx = null; } };
 })();
