@@ -1,0 +1,20 @@
+{
+  "name": "taskpercent",
+  "version": "1.0.0",
+  "description": "Akku-Prozente im Windows-11-Tray mit Warnung unter 15 % - Electron",
+  "main": "src/main.js",
+  "bin": {
+    "taskpercent": "bin/taskpercent.js"
+  },
+  "scripts": {
+    "start": "electron .",
+    "demo": "electron . --simulate 14",
+    "dist": "electron-builder --win portable"
+  },
+  "license": "MIT",
+  "private": true,
+  "devDependencies": {
+    "electron": "^45.2.3",
+    "electron-builder": "^26.18.0"
+  }
+}

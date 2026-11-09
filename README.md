@@ -1,22 +1,25 @@
 # taskPercent
 
-Zeigt den Akkustand als **Zahl direkt im Tray-Icon** der Windows-11-Taskleiste – und warnt bei **15 % oder weniger**.
+Akku-Prozente als **Zahl direkt im Windows-11-Tray** – mit Flyout im „Obsidian Cell"-Design und **Warnung bei ≤ 15 %**.
+Technik: Electron (Main + Renderer), Vanilla HTML/CSS/JS, kein Framework.
 
-| Zustand | Icon |
-|---|---|
-| > 30 % | dunkel, weisse Zahl |
-| ≤ 30 % | gelb |
-| ≤ 15 % (Akkubetrieb) | **rot, blinkend** + Windows-Benachrichtigung + Warnfenster unten rechts |
-| am Netzteil | grün |
+## Starten (Windows, einmalig `npm install`)
 
-## Benutzen
+```bash
+npm install
+npm start                 # oder: npx taskpercent
+npx taskpercent show      # Flyout öffnen
+npx taskpercent test      # Warnung ausprobieren
+npx taskpercent quit      # beenden
+npx taskpercent --simulate 14    # Akku simulieren (60c = 60 % am Netz)
+npm link                  # optional: danach überall `taskpercent`
+npm run dist              # portable .exe in dist/
+```
 
-1. `BatteryTray.ps1` irgendwohin legen (z. B. `C:\Tools\taskPercent\`).
-2. Rechtsklick → **Mit PowerShell ausführen**
-   (oder: `powershell -ExecutionPolicy Bypass -File BatteryTray.ps1`).
-3. Rechtsklick aufs Icon → **Mit Windows starten** für Autostart. **Warnung testen** zeigt das Warnfenster.
+## Features
+- **Tray-Icon** mit Prozentzahl, Füllbalken und Zustandsfarbe (mint / amber / koralle / lime beim Laden, Blitz).
+- **Flyout** per Klick: 20-Segment-Ring (je 5 %), Restzeit, Status, einstellbare Warnschwelle (5–30 %), Autostart-Schalter.
+- **Warnung** (≤ Schwelle, nicht am Netzteil): blinkendes Icon, Windows-Benachrichtigung und eigener Toast unten rechts mit ablaufendem Balken. Neu scharf erst bei Schwelle + 5 % oder nach dem Einstecken.
+- Win11 versteckt neue Tray-Icons im `^`-Überlauf – einmal in die Taskleiste ziehen.
 
-> **Windows 11 versteckt neue Icons** im Überlauf (`^`-Pfeil). Einmal das Icon von dort in die Taskleiste ziehen,
-> oder: Einstellungen → Personalisierung → Taskleiste → *Weitere Taskleistensymbole* → „PowerShell" einschalten.
-
-Schwellwerte (`$WarnThreshold` usw.) stehen oben im Skript. Keine Installation, keine Zusatzpakete.
+Designsystem: [docs/DESIGN.md](docs/DESIGN.md). Das ursprüngliche PowerShell-Skript liegt als `legacy-BatteryTray.ps1` bei.

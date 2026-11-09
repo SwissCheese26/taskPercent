@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>taskPercent</title>
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="flyout.css">
+</head>
+<body data-state="normal">
+<main class="shell" aria-label="Akkustatus">
+  <header>
+    <span class="brand"><i class="dot"></i>task<b>percent</b></span>
+    <span class="chip" id="chip" role="status">—</span>
+  </header>
+
+  <section class="gauge" aria-live="polite">
+    <svg id="ring" viewBox="-110 -110 220 220" aria-hidden="true"></svg>
+    <div class="readout">
+      <div class="num"><span id="pct">--</span><sup>%</sup></div>
+      <div class="sub" id="sub">&nbsp;</div>
+    </div>
+  </section>
+
+  <section class="stats">
+    <div><label>Status</label><strong id="st-state">—</strong></div>
+    <div><label>Restzeit</label><strong id="st-time">—</strong></div>
+    <div><label>Warnung</label><strong id="st-thr">15%</strong></div>
+  </section>
+
+  <section class="control">
+    <span>Schwelle für Warnung</span>
+    <div class="stepper">
+      <button id="thr-minus" aria-label="Schwelle senken">−</button>
+      <output id="thr-val">15%</output>
+      <button id="thr-plus" aria-label="Schwelle erhöhen">+</button>
+    </div>
+  </section>
+
+  <footer>
+    <label class="switch"><input type="checkbox" id="autostart"><span class="track"><i></i></span>Mit Windows starten</label>
+    <div class="actions">
+      <button class="ghost" id="test">Warnung testen</button>
+      <button class="ghost" id="quit">Beenden</button>
+    </div>
+  </footer>
+</main>
+<script src="tray-icon.js"></script>
+<script src="flyout.js"></script>
+</body>
+</html>

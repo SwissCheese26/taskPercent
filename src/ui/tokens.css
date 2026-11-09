@@ -1,0 +1,40 @@
+/* taskPercent design tokens - "Obsidian Cell" */
+:root {
+  /* surface */
+  --bg-0: #0A0D12;      /* window */
+  --bg-1: #10151C;      /* raised */
+  --bg-2: #171E28;      /* controls */
+  --line: #222B38;
+  --text: #E8EEF6;
+  --text-dim: #8895A7;
+  --text-faint: #566274;
+
+  /* state tones: --tone is swapped per state via [data-state] */
+  --tone-normal:   #5CF2C8;  /* mint   */
+  --tone-charging: #C6FF4D;  /* lime   */
+  --tone-warn:     #FFB224;  /* amber  */
+  --tone-critical: #FF4D5E;  /* coral  */
+  --tone: var(--tone-normal);
+
+  /* type */
+  --font-display: "Bahnschrift", "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "Cascadia Mono", "Consolas", ui-monospace, monospace;
+
+  /* space (4px base) */
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 24px; --s6: 32px;
+  --radius: 14px; --radius-sm: 8px;
+
+  /* motion */
+  --ease: cubic-bezier(.2,.8,.2,1);
+  --t-fast: 140ms; --t-med: 320ms; --t-slow: 900ms;
+}
+body { --tone-glow: color-mix(in srgb, var(--tone) 55%, transparent); --tone-soft: color-mix(in srgb, var(--tone) 14%, transparent); }
+[data-state="normal"]   { --tone: var(--tone-normal); }
+[data-state="charging"] { --tone: var(--tone-charging); }
+[data-state="warn"]     { --tone: var(--tone-warn); }
+[data-state="critical"] { --tone: var(--tone-critical); }
+
+* { box-sizing: border-box; margin: 0; }
+html, body { background: var(--bg-0); color: var(--text); font-family: var(--font-body); -webkit-font-smoothing: antialiased; user-select: none; overflow: hidden; }
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
