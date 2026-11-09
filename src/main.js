@@ -1,6 +1,7 @@
 const { app, BrowserWindow, Tray, Menu, Notification, screen, ipcMain, nativeImage } = require('electron');
 const fs = require('fs');
 const path = require('path');
+const native = require('./native');
 
 const UI = path.join(__dirname, 'ui');
 let tray, flyout, devices, toast, toastTimer, blinkTimer;
@@ -157,4 +158,10 @@ ipcMain.on('toast:test', () => showToast(battery ? battery.percent : 14));
 ipcMain.on('toast:close', closeToast);
 ipcMain.on('devices:open', () => { flyout.hide(); showDevices(); });
 ipcMain.on('devices:close', () => devices && devices.close());
+// ---------- Audio-Geraete (Lautstaerke / Stummschaltung)
+const guard = (fn) => async (_e, a) => { try { return { ok: true, data: await fn(a || {}) }; } catch (err) { return { ok: false, error: err.message }; } };
+ipcMain.handle('audio:list', guard(() => native.audio.call('list')));
+ipcMain.handle('audio:volume', guard((a) => native.audio.call('volume', { id: String(a.id), value: Number(a.value) })));
+ipcMain.handle('audio:mute', guard((a) => native.audio.call('mute', { id: String(a.id), value: !!a.value })));
+app.on('before-quit', () => native.audio.stop());
 ipcMain.on('app:quit', () => app.quit());

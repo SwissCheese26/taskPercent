@@ -1,6 +1,13 @@
 // Geräte-Fenster: Tab-Router, Modal-Helfer und gemeinsame Utilities.
 const $ = (id) => document.getElementById(id);
-const api = window.api;
+const api = window.api || { // Browser-Vorschau ohne Electron: Demo-Daten
+  closeDevices() {},
+  audioList: async () => ({ ok: true, data: [
+    { Id: 'a', Name: 'Lautsprecher (Realtek Audio)', Flow: 'render', Volume: 42, Muted: false, IsDefault: true },
+    { Id: 'b', Name: 'Kopfhörer (WH-1000XM5)', Flow: 'render', Volume: 65, Muted: false, IsDefault: false },
+    { Id: 'c', Name: 'Mikrofon (Headset)', Flow: 'capture', Volume: 80, Muted: true, IsDefault: true } ] }),
+  audioVolume: async () => ({ ok: true }), audioMute: async () => ({ ok: true }),
+};
 const tabs = {}; // Feature-Module registrieren sich hier: tabs.mic = { open(), close() }
 
 function showTab(name) {

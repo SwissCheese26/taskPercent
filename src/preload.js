@@ -8,5 +8,8 @@ contextBridge.exposeInMainWorld('api', {
   closeToast: () => ipcRenderer.send('toast:close'),
   openDevices: () => ipcRenderer.send('devices:open'),
   closeDevices: () => ipcRenderer.send('devices:close'),
+  audioList: () => ipcRenderer.invoke('audio:list'),
+  audioVolume: (id, value) => ipcRenderer.invoke('audio:volume', { id, value }),
+  audioMute: (id, value) => ipcRenderer.invoke('audio:mute', { id, value }),
   quit: () => ipcRenderer.send('app:quit'),
 });
