@@ -17,7 +17,7 @@ const api = window.api || { // Browser-Vorschau ohne Electron: Demo-Daten
     { Id: 'g', Name: 'Xbox Wireless Controller', Kind: 'gamepad', Bus: 'Bluetooth', Battery: 9 },
     { Id: 'h', Name: 'WH-1000XM5', Kind: 'headset', Bus: 'Bluetooth', Battery: 64 },
     { Id: 'w', Name: 'Logitech Webcam', Kind: 'other', Bus: 'USB', Battery: null } ] }),
-  periphPin: async () => ({ ok: true }), periphPinned: async () => ({ ok: true, data: ['k'] }),
+  onDevicesTab() {}, periphPin: async () => ({ ok: true }), periphPinned: async () => ({ ok: true, data: ['k'] }),
   audioVolume: async () => ({ ok: true }), audioMute: async () => ({ ok: true }),
 };
 const tabs = {}; // Feature-Module registrieren sich hier: tabs.mic = { open(), close() }
@@ -49,3 +49,7 @@ function el(tag, cls, html) { const e = document.createElement(tag); if (cls) e.
 
 // BiquadFilter erzeugen (frequency/gain sind AudioParams, nicht direkt zuweisbar)
 function biquad(ctx, type, freq, q) { const f = ctx.createBiquadFilter(); f.type = type; f.frequency.value = freq; if (q) f.Q.value = q; return f; }
+
+// Tab per Query (?tab=periph) oder per IPC oeffnen
+document.addEventListener('DOMContentLoaded', () => { const t = new URLSearchParams(location.search).get('tab'); if (t && tabs[t]) showTab(t); });
+if (api.onDevicesTab) api.onDevicesTab((t) => tabs[t] && showTab(t));

@@ -9,7 +9,7 @@ let tray, flyout, devices, toast, toastTimer, blinkTimer;
 let battery = null;          // letzter Zustand vom Renderer
 let warned = false, blinkOn = false;
 let sim = null;              // --simulate Wert
-let settings = { threshold: 15 };
+let settings = { threshold: 15, pinned: [] };
 const settingsFile = () => path.join(app.getPath('userData'), 'settings.json');
 
 // ---------- CLI-Argumente (auch von einer zweiten Instanz)
@@ -38,7 +38,7 @@ app.on('second-instance', (_e, argv) => handleArgs(parseArgs(argv.slice(1))));
 
 // ---------- Einstellungen
 function loadSettings() { try { settings = { ...settings, ...JSON.parse(fs.readFileSync(settingsFile(), 'utf8')) }; } catch {} }
-function saveSettings() { try { fs.writeFileSync(settingsFile(), JSON.stringify({ threshold: settings.threshold })); } catch {} }
+function saveSettings() { try { fs.writeFileSync(settingsFile(), JSON.stringify({ threshold: settings.threshold, pinned: settings.pinned })); } catch {} }
 const publicSettings = () => ({ threshold: settings.threshold, autostart: app.getLoginItemSettings().openAtLogin });
 
 // ---------- Fenster
@@ -63,8 +63,9 @@ function showFlyout() {
   flyout.setPosition(Math.round(x), Math.round(y));
   flyout.show(); flyout.focus();
 }
-function showDevices() {
-  if (devices && !devices.isDestroyed()) { devices.show(); devices.focus(); return; }
+function showDevices(tab) {
+  if (typeof tab !== 'string') tab = undefined;
+  if (devices && !devices.isDestroyed()) { devices.show(); devices.focus(); if (tab) devices.webContents.send('devices:tab', tab); return; }
   devices = new BrowserWindow({
     width: 1000, height: 680, minWidth: 820, minHeight: 560, frame: true, autoHideMenuBar: true, backgroundColor: '#0A0D12', title: 'taskPercent – Geräte',
     webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true },
@@ -72,7 +73,7 @@ function showDevices() {
   devices.setMenu(null);
   // Mikrofon-Zugriff nur fuer dieses lokale Fenster erlauben
   devices.webContents.session.setPermissionRequestHandler((_wc, perm, cb) => cb(perm === 'media'));
-  devices.loadFile(path.join(UI, 'devices.html'));
+  devices.loadFile(path.join(UI, 'devices.html'), tab ? { query: { tab } } : {});
   devices.on('closed', () => (devices = null));
 }
 function showToast(percent) {
@@ -93,6 +94,35 @@ function closeToast() {
   if (toast && !toast.isDestroyed()) toast.close();
   toast = null;
 }
+
+// ---------- Peripherie-Tray-Icons (pro angepinntem Geraet ein Icon)
+const periphTrays = new Map(); // id -> { tray, data, blink, on }
+function syncPeriph(items) { // items: [{id, name, kind, bus, battery, icons:{normal, alt}}] nur fuer angepinnte
+  const ids = new Set(items.map((i) => i.id));
+  for (const [id, e] of periphTrays) if (!ids.has(id)) { clearInterval(e.blink); e.tray.destroy(); periphTrays.delete(id); }
+  for (const it of items) {
+    let e = periphTrays.get(it.id);
+    if (!e) {
+      const t = new Tray(img(it.icons.normal));
+      t.on('click', () => showDevices('periph'));
+      e = { tray: t, blink: null, on: false, data: it }; periphTrays.set(it.id, e);
+    }
+    e.data = it;
+    e.tray.setImage(img(it.icons.normal));
+    e.tray.setToolTip(`${it.name}${it.battery == null ? '' : ' – Akku ' + it.battery + '%'}`);
+    const low = it.battery != null && it.battery <= 15;
+    if (low && !e.blink) e.blink = setInterval(() => { e.on = !e.on; e.tray.setImage(img(e.on ? e.data.icons.alt : e.data.icons.normal)); }, 700);
+    if (!low && e.blink) { clearInterval(e.blink); e.blink = null; e.on = false; }
+  }
+}
+ipcMain.on('periph:report', (_e, items) => syncPeriph(items));
+ipcMain.handle('periph:pinned', async () => ({ ok: true, data: settings.pinned }));
+ipcMain.handle('periph:pin', async (_e, a) => {
+  const set = new Set(settings.pinned); a.on ? set.add(String(a.id)) : set.delete(String(a.id));
+  settings.pinned = [...set]; saveSettings();
+  if (flyout && !flyout.isDestroyed()) flyout.webContents.send('periph:refresh');
+  return { ok: true };
+});
 
 // ---------- Tray / Warnlogik
 const img = (url) => nativeImage.createFromDataURL(url);
@@ -123,7 +153,7 @@ function onBattery(b) {
 function buildMenu() {
   return Menu.buildFromTemplate([
     { label: 'Öffnen', click: showFlyout },
-    { label: 'Geräte verwalten…', click: showDevices },
+    { label: 'Geräte verwalten…', click: () => showDevices() },
     { label: 'Warnung testen', click: () => showToast(battery ? battery.percent : 14) },
     { type: 'separator' },
     { label: 'Beenden', click: () => app.quit() },

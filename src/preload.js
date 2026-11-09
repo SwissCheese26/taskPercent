@@ -16,6 +16,11 @@ contextBridge.exposeInMainWorld('api', {
   adminStatus: () => ipcRenderer.invoke('admin:status'),
   adminSetup: () => ipcRenderer.invoke('admin:setup'),
   adminRemove: () => ipcRenderer.invoke('admin:remove'),
+  periphPin: (id, on) => ipcRenderer.invoke('periph:pin', { id, on }),
+  periphPinned: () => ipcRenderer.invoke('periph:pinned'),
+  periphReport: (items) => ipcRenderer.send('periph:report', items),
+  onPeriphRefresh: (cb) => ipcRenderer.on('periph:refresh', cb),
+  onDevicesTab: (cb) => ipcRenderer.on('devices:tab', (_e, t) => cb(t)),
   periphList: () => ipcRenderer.invoke('periph:list'),
   quit: () => ipcRenderer.send('app:quit'),
 });

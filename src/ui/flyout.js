@@ -85,4 +85,18 @@ $('test').onclick = () => api.testWarning();
 $('quit').onclick = () => api.quit();
 api.onSettings((s) => { settings = s; $('autostart').checked = s.autostart; render(); });
 
+// ---- Angepinnte Peripherie: Akkustand pollen, Tray-Icons melden
+async function pollPeriph() {
+  if (!api.periphPinned || params.get('sim')) return;
+  const p = await api.periphPinned(); if (!p.ok || !p.data.length) return api.periphReport([]);
+  const r = await api.periphList(); if (!r.ok) return;
+  const items = r.data.filter((d) => p.data.includes(d.Id)).map((d) => ({
+    id: d.Id, name: d.Name, kind: d.Kind, bus: d.Bus, battery: d.Battery,
+    icons: { normal: drawDeviceTrayIcon(d.Kind, d.Battery, false), alt: drawDeviceTrayIcon(d.Kind, d.Battery, true) },
+  }));
+  api.periphReport(items);
+}
+if (api.onPeriphRefresh) api.onPeriphRefresh(pollPeriph);
+setInterval(pollPeriph, 60000); setTimeout(pollPeriph, 4000);
+
 api.getSettings().then((s) => { settings = s; $('autostart').checked = s.autostart; startSource(); });
