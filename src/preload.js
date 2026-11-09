@@ -16,5 +16,6 @@ contextBridge.exposeInMainWorld('api', {
   adminStatus: () => ipcRenderer.invoke('admin:status'),
   adminSetup: () => ipcRenderer.invoke('admin:setup'),
   adminRemove: () => ipcRenderer.invoke('admin:remove'),
+  periphList: () => ipcRenderer.invoke('periph:list'),
   quit: () => ipcRenderer.send('app:quit'),
 });

@@ -11,6 +11,13 @@ const api = window.api || { // Browser-Vorschau ohne Electron: Demo-Daten
     { Name: 'Galaxy Buds2', Id: 'BTHENUM\\DEV_2', Connected: false, Disabled: true } ] }),
   btAction: async () => ({ ok: true }), adminStatus: async () => ({ ok: true, data: false }),
   adminSetup: async () => ({ ok: true }), adminRemove: async () => ({ ok: true }),
+  periphList: async () => ({ ok: true, data: [
+    { Id: 'm', Name: 'MX Master 3S', Kind: 'mouse', Bus: 'Bluetooth', Battery: 82 },
+    { Id: 'k', Name: 'Keychron K8', Kind: 'keyboard', Bus: 'Bluetooth', Battery: 27 },
+    { Id: 'g', Name: 'Xbox Wireless Controller', Kind: 'gamepad', Bus: 'Bluetooth', Battery: 9 },
+    { Id: 'h', Name: 'WH-1000XM5', Kind: 'headset', Bus: 'Bluetooth', Battery: 64 },
+    { Id: 'w', Name: 'Logitech Webcam', Kind: 'other', Bus: 'USB', Battery: null } ] }),
+  periphPin: async () => ({ ok: true }), periphPinned: async () => ({ ok: true, data: ['k'] }),
   audioVolume: async () => ({ ok: true }), audioMute: async () => ({ ok: true }),
 };
 const tabs = {}; // Feature-Module registrieren sich hier: tabs.mic = { open(), close() }

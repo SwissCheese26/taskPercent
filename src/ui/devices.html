@@ -12,6 +12,7 @@
     <div class="brand"><i class="dot"></i>task<b>percent</b></div>
     <nav role="tablist" aria-label="Bereiche">
       <button role="tab" data-tab="devices" aria-selected="true"><span class="ico">◉</span>Geräte</button>
+      <button role="tab" data-tab="periph"><span class="ico">⌨</span>Peripherie</button>
       <button role="tab" data-tab="mic"><span class="ico">●</span>Mikrofon-Labor</button>
       <button role="tab" data-tab="hearing"><span class="ico">◎</span>Hörtest</button>
       <button role="tab" data-tab="sound"><span class="ico">≋</span>Klang &amp; Bass</button>
@@ -21,6 +22,7 @@
 
   <main>
     <section class="panel" id="tab-devices" role="tabpanel"><h1>Geräte</h1><p class="lead" id="devices-lead">Lade…</p><div id="devices-root"></div></section>
+    <section class="panel" id="tab-periph" role="tabpanel" hidden><h1>Peripherie</h1><p class="lead" id="periph-lead">Lade…</p><div id="periph-root"></div></section>
     <section class="panel" id="tab-mic" role="tabpanel" hidden><h1>Mikrofon-Labor</h1><div id="mic-root"></div></section>
     <section class="panel" id="tab-hearing" role="tabpanel" hidden><h1>Hörtest</h1><div id="hearing-root"></div></section>
     <section class="panel" id="tab-sound" role="tabpanel" hidden><h1>Klang &amp; Bass</h1><div id="sound-root"></div></section>
@@ -31,8 +33,10 @@
   <div class="sheet"><h2 id="modal-title"></h2><div id="modal-body"></div><div class="row end" id="modal-actions"></div></div>
 </div>
 
+<script src="device-glyph.js"></script>
 <script src="devices.js"></script>
 <script src="tab-devices.js"></script>
+<script src="tab-periph.js"></script>
 <script src="tab-mic.js"></script>
 <script src="tab-hearing.js"></script>
 <script src="tab-sound.js"></script>

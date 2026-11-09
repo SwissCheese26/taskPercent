@@ -170,8 +170,9 @@ ipcMain.handle('bt:action', guard((a) => {
   if (!['connect', 'disconnect'].includes(a.action)) throw new Error('Aktion nicht erlaubt');
   return admin.request(a.action, String(a.id));
 }));
+ipcMain.handle('periph:list', guard(() => native.peripherals.call('list')));
 ipcMain.handle('admin:status', guard(() => admin.status()));
 ipcMain.handle('admin:setup', guard(() => admin.setup()));
 ipcMain.handle('admin:remove', guard(() => admin.remove()));
-app.on('before-quit', () => { native.audio.stop(); native.bluetooth.stop(); });
+app.on('before-quit', () => { native.audio.stop(); native.bluetooth.stop(); native.peripherals.stop(); });
 ipcMain.on('app:quit', () => app.quit());
