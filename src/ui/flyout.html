@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: blob:; media-src 'self' blob:; style-src 'self' 'unsafe-inline'; script-src 'self'">
+<title>taskPercent</title>
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="flyout.css">
+</head>
+<body data-state="normal">
+<main class="shell" aria-label="Akkustatus">
+  <header>
+    <span class="title">Akku</span>
+    <span class="status" id="chip" role="status">—</span>
+  </header>
+
+  <section class="gauge" aria-live="polite">
+    <svg id="ring" viewBox="-110 -110 220 220" aria-hidden="true">
+      <circle class="track" r="94"></circle>
+      <circle class="prog" id="prog" r="94" transform="rotate(-90)"></circle>
+    </svg>
+    <div class="readout">
+      <div class="num"><span id="pct">--</span><sup>%</sup></div>
+      <div class="sub" id="sub">&nbsp;</div>
+    </div>
+  </section>
+
+  <section class="list">
+    <div class="item"><span>Status</span><strong id="st-state">—</strong></div>
+    <div class="item"><span>Restzeit</span><strong id="st-time">—</strong></div>
+    <div class="item"><span>Warnen bei</span>
+      <div class="stepper"><button id="thr-minus" aria-label="Schwelle senken">−</button><output id="thr-val">15%</output><button id="thr-plus" aria-label="Schwelle erhöhen">+</button></div>
+    </div>
+    <div class="item"><label for="autostart">Mit Windows starten</label>
+      <label class="switch"><input type="checkbox" id="autostart"><span class="track"><i></i></span></label>
+    </div>
+  </section>
+
+  <footer>
+    <button class="primary" id="manage">Geräte verwalten</button>
+    <div class="actions"><button class="plain" id="test">Warnung testen</button><button class="plain" id="quit">Beenden</button></div>
+  </footer>
+</main>
+<script src="tray-icon.js"></script>
+<script src="device-glyph.js"></script>
+<script src="flyout.js"></script>
+</body>
+</html>
